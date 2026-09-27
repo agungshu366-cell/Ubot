@@ -1,0 +1,21 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/connect", "dest": "/connect.html" },
+    { "src": "/profile", "dest": "/profile.html" },
+    { "src": "/plan", "dest": "/plan.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
