@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Connect UBot — Metagz</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="toast-c"></div>
+
+<!-- Maintenance Modal -->
+<div class="moverlay" id="mdMaint">
+  <div class="mbox">
+    <div class="mic red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="mtitle">Website Sedang Maintenance</div>
+    <div class="mdesc">WEBSITE KINI SEDANG MAINTENANCE, MOHON BERSABAR ATAU HUBUNGI ADMIN DI BAWAH INI</div>
+    <div class="mactions">
+      <a class="mbtn prim" href="https://t.me/AgzOld" target="_blank">
+        <i class="fa-brands fa-telegram"></i> HUBUNGI ADMIN
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="conn-wrap">
+  <div class="conn-glow"></div>
+
+  <div class="conn-logo">
+    <div class="conn-logo-ic"><i class="fa-brands fa-telegram"></i></div>
+    <div class="conn-logo-t">UBOT FREE</div>
+    <div class="conn-logo-s">Telegram Userbot Panel</div>
+  </div>
+
+  <div class="conn-card">
+    <div class="step-dots">
+      <div class="sdot" id="d1"></div>
+      <div class="sdot" id="d2"></div>
+      <div class="sdot" id="d3"></div>
+    </div>
+
+    <!-- Step 1: Nomor HP -->
+    <div id="s1">
+      <div class="step-title"><i class="fa-brands fa-telegram"></i> Connect UBot</div>
+      <div class="step-desc">Masukkan nomor HP Telegram untuk menghubungkan akun sebagai Userbot.</div>
+      <div class="flbl">Nomor HP Telegram</div>
+      <div class="fwrap">
+        <i class="fa-solid fa-mobile-screen-button fic"></i>
+        <input class="finput" id="phoneIn" type="tel" placeholder="+62812xxxx" inputmode="numeric" autocomplete="tel">
+      </div>
+      <div class="fhint" id="phoneHint">Format: +628xxx atau 08xxx</div>
+      <button class="btn-p" id="btnOtp" onclick="sendOtp()">
+        <span id="lblOtp">Kirim OTP</span>
+        <div class="spin" id="spOtp"></div>
+      </button>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="s2" style="display:none">
+      <div class="step-title"><i class="fa-solid fa-shield-halved"></i> Verifikasi OTP</div>
+      <div class="otp-box">
+        <i class="fa-brands fa-telegram"></i>
+        <p>Kode OTP dikirim ke <strong>Telegram</strong> kamu. Cek pesan masuk.</p>
+      </div>
+      <div class="flbl">Kode OTP</div>
+      <div class="fwrap">
+        <i class="fa-solid fa-key fic"></i>
+        <input class="finput" id="otpIn" type="text" placeholder="Masukkan kode OTP..." inputmode="numeric" maxlength="8" autocomplete="one-time-code">
+      </div>
+      <div class="fhint" id="otpHint">Kode 5 angka dari Telegram</div>
+      <button class="btn-p" id="btnVotp" onclick="verifyOtp()">
+        <span id="lblVotp">Verifikasi OTP</span>
+        <div class="spin" id="spVotp"></div>
+      </button>
+      <button class="btn-s" onclick="goStep(1)"><i class="fa-solid fa-arrow-left"></i> Ganti Nomor</button>
+    </div>
+
+    <!-- Step 3: 2FA -->
+    <div id="s3" style="display:none">
+      <div class="step-title"><i class="fa-solid fa-lock"></i> Verifikasi 2FA</div>
+      <div class="step-desc">Akun menggunakan 2FA. Masukkan password Cloud Telegram kamu.</div>
+      <div class="flbl">Password Cloud Telegram</div>
+      <div class="fwrap">
+        <i class="fa-solid fa-lock fic"></i>
+        <input class="finput" id="tfaIn" type="password" placeholder="Password 2FA..." autocomplete="current-password">
+      </div>
+      <div class="fhint" id="tfaHint">Password dari Telegram Settings &rarr; Privacy &rarr; Two-Step</div>
+      <button class="btn-p" id="btnV2fa" onclick="verify2fa()">
+        <span id="lblV2fa">Konfirmasi</span>
+        <div class="spin" id="spV2fa"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="conn-foot">
+    Butuh bantuan?
+    <a href="https://t.me/AgzOld" target="_blank">Hubungi Admin</a> &middot;
+    <a href="https://t.me/metagz_worm" target="_blank">Channel</a>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+
+const API = window.UBOT_CONFIG.API_URL;
+
+// FIX KRITIS: selalu credentials:'include' untuk cross-origin cookies
+async function apiFetch(path, body = null, method = null) {
+  const opts = {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (body) {
+    opts.method = method || 'POST';
+    opts.body   = JSON.stringify(body);
+  } else {
+    opts.method = method || 'GET';
+  }
+  const r = await fetch(API + path, opts);
+  const d = await r.json();
+  if (!r.ok) throw Object.assign(new Error(d.error || 'Request gagal'), { data: d });
+  return d;
+}
+
+async function checkServer() {
+  try {
+    const r = await fetch(API + '/api/health', {
+      signal: AbortSignal.timeout(6000),
+      credentials: 'include',
+    });
+    return r.ok;
+  } catch (e) { return false; }
+}
+
+function showMaint() {
+  document.getElementById('mdMaint').classList.add('show');
+}
+
+function el(id) { return document.getElementById(id); }
+
+function toast(msg, color = 'var(--blue-l)', icon = 'fa-solid fa-info-circle') {
+  const c = el('toast-c');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.borderColor = color;
+  t.innerHTML = `<i class="${icon}" style="color:${color}"></i>${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2800);
+}
+
+function closeM(id) { el(id)?.classList.remove('show'); }
+
+let step = 1;
+
+async function init() {
+  const ok = await checkServer();
+  if (!ok) { showMaint(); return; }
+  try {
+    const d = await apiFetch('/api/auth/status');
+    if (d.loggedIn) { window.location.replace('dashboard.html'); return; }
+  } catch (_) {}
+  goStep(1);
+}
+
+function goStep(n) {
+  ['s1','s2','s3'].forEach((id, i) => el(id).style.display = (i+1===n?'block':'none'));
+  ['d1','d2','d3'].forEach((id, i) => {
+    const d = el(id);
+    d.className = 'sdot' + (i+1<n?' done':'') + (i+1===n?' active':'');
+  });
+  step = n;
+  if (n===2) setTimeout(() => el('otpIn').focus(), 80);
+  if (n===3) setTimeout(() => el('tfaIn').focus(), 80);
+}
+
+function setLoad(btnId, spId, lblId, on, text) {
+  const b=el(btnId), s=el(spId), l=el(lblId);
+  b.disabled = on;
+  s.classList.toggle('show', on);
+  l.textContent = on ? 'Memproses...' : text;
+}
+
+function shakeIn(id, hintId, msg) {
+  const e = el(id);
+  e.value = '';
+  e.classList.add('fshake','ferr');
+  if (navigator.vibrate) navigator.vibrate([80,40,80]);
+  setTimeout(() => e.classList.remove('fshake','ferr'), 500);
+  if (hintId && msg) {
+    const h = el(hintId);
+    h.textContent = msg;
+    h.className = 'fhint ferr';
+  }
+  e.focus();
+}
+
+async function sendOtp() {
+  const phone = el('phoneIn').value.trim();
+  if (!phone) { shakeIn('phoneIn','phoneHint','Nomor HP tidak boleh kosong!'); return; }
+  setLoad('btnOtp','spOtp','lblOtp', true, 'Kirim OTP');
+  try {
+    await apiFetch('/api/auth/send-otp', { phone });
+    goStep(2);
+  } catch (e) {
+    shakeIn('phoneIn','phoneHint', e.data?.error || e.message || 'Gagal kirim OTP');
+  } finally {
+    setLoad('btnOtp','spOtp','lblOtp', false, 'Kirim OTP');
+  }
+}
+
+async function verifyOtp() {
+  const code = el('otpIn').value.trim();
+  if (!code) { shakeIn('otpIn','otpHint','Kode OTP tidak boleh kosong!'); return; }
+  setLoad('btnVotp','spVotp','lblVotp', true, 'Verifikasi OTP');
+  try {
+    const d = await apiFetch('/api/auth/verify-otp', { code });
+    if (d.step === '2fa') { goStep(3); return; }
+    if (d.step === 'done') { window.location.replace('dashboard.html'); }
+  } catch (e) {
+    shakeIn('otpIn','otpHint', e.data?.error || 'OTP salah!');
+  } finally {
+    setLoad('btnVotp','spVotp','lblVotp', false, 'Verifikasi OTP');
+  }
+}
+
+async function verify2fa() {
+  const password = el('tfaIn').value.trim();
+  if (!password) { shakeIn('tfaIn','tfaHint','Password tidak boleh kosong!'); return; }
+  setLoad('btnV2fa','spV2fa','lblV2fa', true, 'Konfirmasi');
+  try {
+    const d = await apiFetch('/api/auth/verify-2fa', { password });
+    if (d.step === 'done') { window.location.replace('dashboard.html'); }
+  } catch (e) {
+    shakeIn('tfaIn','tfaHint', e.data?.error || 'Password 2FA salah!');
+  } finally {
+    setLoad('btnV2fa','spV2fa','lblV2fa', false, 'Konfirmasi');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (step===1) sendOtp();
+  if (step===2) verifyOtp();
+  if (step===3) verify2fa();
+});
+
+init();
+</script>
+</body>
+</html>

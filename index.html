@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UBot Metagz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#0a0c12;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif;color:#e2e8f0}
+.spin{width:40px;height:40px;border:3px solid rgba(59,130,246,.2);border-top-color:#3b82f6;border-radius:50%;animation:sp .8s linear infinite;margin-bottom:14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+p{font-size:13px;color:#64748b}
+</style>
+</head>
+<body>
+<div class="spin"></div>
+<p id="msg">Menghubungkan ke server...</p>
+<script src="config.js"></script>
+<script>
+const API = window.UBOT_CONFIG.API_URL;
+(async () => {
+  const msg = document.getElementById('msg');
+  try {
+    const r = await fetch(API + '/api/health', {
+      signal: AbortSignal.timeout(7000),
+      credentials: 'include',
+    });
+    if (!r.ok) throw new Error('Server error');
+    msg.textContent = 'Memeriksa sesi...';
+    const s = await fetch(API + '/api/auth/status', { credentials: 'include' });
+    const d = await s.json();
+    window.location.replace(d.loggedIn ? 'dashboard.html' : 'connect.html');
+  } catch (e) {
+    msg.textContent = 'Server tidak dapat dijangkau';
+    setTimeout(() => window.location.replace('connect.html'), 1500);
+  }
+})();
+</script>
+</body>
+</html>
