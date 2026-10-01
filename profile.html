@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Profil - UBot</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loverlay"><div class="lspin"></div></div>
+<div id="toast-c"></div>
+
+<div class="moverlay" id="mdBio">
+  <div class="mbox wide">
+    <div class="mic blue"><i class="fa-solid fa-pen"></i></div>
+    <div class="mtitle">Edit Bio Telegram</div>
+    <textarea id="bioTA" style="width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:100px;outline:none;margin-bottom:14px" placeholder="Tulis bio kamu..." maxlength="70" oninput="updBioCnt()"></textarea>
+    <div id="bioCnt" style="text-align:right;font-size:11px;color:var(--text3);margin:-8px 2px 12px">0/70</div>
+    <div class="mactions">
+      <button class="mbtn prim" onclick="saveBio()"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
+      <button class="mbtn outl" onclick="closeM('mdBio')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+  <header class="page-header">
+    <button class="back-btn" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="hdr-plain">Profil</div>
+    <div style="width:36px"></div>
+  </header>
+  <div style="flex:1;overflow-y:auto;padding-bottom:24px">
+    <div class="prof-hero">
+      <div class="prof-av"><span id="pAv">M</span><div class="odot" id="odot" style="display:none"></div></div>
+      <div class="prof-name" id="pName">@user</div>
+      <div class="prof-role"><i class="fa-solid fa-circle" style="font-size:7px"></i> <span id="pStatus">Userbot</span></div>
+    </div>
+
+    <div class="prof-info">
+      <div class="pinfo-head"><i class="fa-solid fa-id-card"></i> Informasi Akun</div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-solid fa-user"></i></div><div><div class="pinfo-lbl">Nama</div><div class="pinfo-val" id="iName">-</div></div></div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-solid fa-at"></i></div><div><div class="pinfo-lbl">Username</div><div class="pinfo-val" id="iUser">-</div></div></div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-solid fa-phone"></i></div><div><div class="pinfo-lbl">Nomor HP</div><div class="pinfo-val" id="iPhone">-</div></div></div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-solid fa-calendar"></i></div><div><div class="pinfo-lbl">Bergabung</div><div class="pinfo-val" id="iJoin">-</div></div></div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-solid fa-crown"></i></div><div><div class="pinfo-lbl">Plan</div><div class="pinfo-val" id="iPlan">Free</div></div></div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-brands fa-telegram" style="color:var(--cyan)"></i></div><div><div class="pinfo-lbl">Follow @metagzz</div><div class="pinfo-val" id="iMeta" style="color:var(--text3)">Belum</div></div></div>
+      <div class="pinfo-row"><div class="pinfo-ic"><i class="fa-solid fa-circle-check"></i></div><div><div class="pinfo-lbl">Status UBot</div><div class="pinfo-val" id="iUbot">Offline</div></div></div>
+    </div>
+
+    <div class="bio-card">
+      <div class="bio-title"><i class="fa-solid fa-pen"></i> Tentang Saya (Bio Telegram)</div>
+      <div class="bio-text" id="pBio">Memuat...</div>
+      <button onclick="editBio()" style="margin-top:12px;padding:9px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-pen" style="color:var(--blue-l)"></i> Edit Bio
+      </button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="sbox"><div class="sbox-v" id="sUp">--</div><div class="sbox-l">Uptime</div></div>
+      <div class="sbox"><div class="sbox-v" id="sCmd">0</div><div class="sbox-l">Commands</div></div>
+      <div class="sbox"><div class="sbox-v" id="sMsg">0</div><div class="sbox-l">Messages</div></div>
+    </div>
+
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+      <a href="https://t.me/metagz_worm" target="_blank" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-size:13px;font-weight:600;text-decoration:none">
+        <i class="fa-brands fa-telegram" style="color:var(--blue-l);font-size:18px"></i> Channel Metagz
+        <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:auto;color:var(--text3);font-size:12px"></i>
+      </a>
+      <a href="https://t.me/AgzOld" target="_blank" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-size:13px;font-weight:600;text-decoration:none">
+        <i class="fa-solid fa-headset" style="color:var(--cyan);font-size:18px"></i> Hubungi Admin
+        <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:auto;color:var(--text3);font-size:12px"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const API='';  // Relative URL — Vercel proxy ke backend
+async function apiFetch(path,body=null,method=null){
+  const opts={credentials:'include',headers:{'Content-Type':'application/json'}};
+  opts.method=body?(method||'POST'):(method||'GET');
+  if(body)opts.body=JSON.stringify(body);
+  const r=await fetch(API+path,opts);
+  const d=await r.json();
+  if(!r.ok)throw Object.assign(new Error(d.error||'Error'),{data:d});
+  return d;
+}
+async function checkAuth(){
+  try{const d=await apiFetch('/api/auth/status');if(!d.loggedIn){window.location.replace('connect.html');return false;}return true;}
+  catch(e){window.location.replace('connect.html');return false;}
+}
+function el(id){return document.getElementById(id);}
+function closeM(id){el(id)?.classList.remove('show');}
+function toast(msg,color,icon){
+  color=color||'var(--blue-l)';icon=icon||'fa-solid fa-info-circle';
+  const c=el('toast-c');if(!c)return;
+  const t=document.createElement('div');
+  t.className='toast';t.style.borderColor=color;
+  t.innerHTML='<i class="'+icon+'" style="color:'+color+'"></i>'+msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);
+}
+
+let curBio='', bioMax=70, bioBusy=false;
+const cpLen=s=>[...String(s||'')].length;
+function updBioCnt(){
+  const n=cpLen(el('bioTA').value), c=el('bioCnt');
+  c.textContent=n+'/'+bioMax;
+  c.style.color=n>bioMax?'var(--red)':(n>=bioMax-10?'var(--yellow)':'var(--text3)');
+}
+// Data profil SELALU ikut akun Telegram (username / nama / bio) — ditarik ulang otomatis tiap 10 detik
+async function loadProfile(first){
+  try{
+    if(first&&!await checkAuth())return;
+    const d=await apiFetch('/api/me');
+    const handle=d.handle||'';
+    const full=d.name||d.firstName||'';
+    const shown=full||handle||d.username||'User';
+    el('pAv').textContent=(shown.replace('@','')[0]||'U').toUpperCase();
+    el('pName').textContent=shown;
+    el('iName').textContent=full||'-';
+    el('iUser').textContent=handle||'-';
+    el('iPhone').textContent=d.phone||'-';
+    el('iJoin').textContent=d.joinedAt?new Date(d.joinedAt).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
+    el('iPlan').textContent={free:'Free',pro:'Pro',max:'MAX'}[d.plan]||'Free';
+    bioMax=d.bioMax||70;
+    if(!bioBusy){el('pBio').textContent=d.bio||'Belum ada bio.';curBio=d.bio||'';}
+    el('sUp').textContent=d.uptime||'--';
+    el('sCmd').textContent=d.commands||0;
+    el('sMsg').textContent=d.messages||0;
+    if(d.ubotConnected){
+      el('pStatus').textContent=d.isOwner?'Owner':'Online';
+      el('odot').style.display='block';
+      el('iUbot').innerHTML='<span style="color:var(--green)">&#x25CF; Online</span>';
+    }else{
+      el('pStatus').textContent=d.isOwner?'Owner':'Userbot';
+      el('odot').style.display='none';
+      el('iUbot').innerHTML='<span style="color:var(--text3)">&#x25CF; Offline</span>';
+    }
+    if(d.joinedMetagzz)el('iMeta').innerHTML='<span style="color:var(--green)">&#x2705; Sudah join</span>';
+  }catch(e){
+    if(e.data&&e.data.code==='UNAUTH'){window.location.replace('connect.html');return;}
+    console.error(e);
+  }
+  el('loverlay').classList.add('hidden');
+}
+function editBio(){el('bioTA').value=curBio;updBioCnt();el('mdBio').classList.add('show');}
+async function saveBio(){
+  const bio=el('bioTA').value.trim();
+  if(cpLen(bio)>bioMax){toast('Bio maksimal '+bioMax+' karakter','var(--red)','fa-solid fa-xmark');return;}
+  if(bioBusy)return;
+  bioBusy=true;
+  try{
+    const d=await apiFetch('/api/me/bio',{bio});
+    curBio=(d&&d.bio!==undefined)?d.bio:bio;
+    el('pBio').textContent=curBio||'Belum ada bio.';
+    closeM('mdBio');toast('Bio Telegram berhasil diperbarui!','var(--green)','fa-solid fa-check');
+  }catch(e){
+    if(e.data&&e.data.code==='UNAUTH'){window.location.replace('connect.html');return;}
+    toast((e.data&&e.data.error)||'Gagal simpan bio','var(--red)','fa-solid fa-xmark');
+  }finally{bioBusy=false;}
+}
+setInterval(()=>loadProfile(false),10000);
+loadProfile(true);
+</script>
+</body></html>

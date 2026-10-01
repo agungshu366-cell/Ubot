@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dashboard — UBot</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loverlay"><div class="lspin"></div></div>
+<div id="toast-c"></div>
+
+<!-- Maintenance Modal -->
+<div class="moverlay" id="mdMaint">
+  <div class="mbox">
+    <div class="mic red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="mtitle">Website Sedang Maintenance</div>
+    <div class="mdesc">WEBSITE KINI SEDANG MAINTENANCE, MOHON BERSABAR ATAU HUBUNGI ADMIN DI BAWAH INI</div>
+    <div class="mactions"><a class="mbtn prim" href="https://t.me/AgzOld" target="_blank"><i class="fa-brands fa-telegram"></i> HUBUNGI ADMIN</a></div>
+  </div>
+</div>
+
+<!-- Disconnect Modal -->
+<div class="moverlay" id="mdDisconn">
+  <div class="mbox">
+    <div class="mic red"><i class="fa-solid fa-plug-circle-xmark"></i></div>
+    <div class="mtitle">Yakin Ingin Menonaktifkan UBot?</div>
+    <div class="mdesc">JIKA DISCONNECT MAKA SEMUA AKTIVITAS DAN DATA AKAN HILANG</div>
+    <div class="mactions">
+      <button class="mbtn dng" onclick="confirmDisconn()">YAKIN</button>
+      <button class="mbtn outl" onclick="closeM('mdDisconn')">TIDAK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Modal -->
+<div class="moverlay" id="mdLogout">
+  <div class="mbox">
+    <div class="mic red"><i class="fa-solid fa-right-from-bracket"></i></div>
+    <div class="mtitle">Yakin Ingin Log Out?</div>
+    <div class="mdesc">UBOT AKAN DIPUTUS DAN KAMU HARUS LOGIN LAGI DENGAN NOMOR HP + OTP</div>
+    <div class="mactions">
+      <button class="mbtn dng" onclick="confirmLogout()">YAKIN</button>
+      <button class="mbtn outl" onclick="closeM('mdLogout')">TIDAK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join Channel Modal -->
+<div class="moverlay" id="mdJoin">
+  <div class="mbox">
+    <div class="mic green"><i class="fa-brands fa-telegram"></i></div>
+    <div class="mtitle">Auto-Join Berhasil!</div>
+    <div class="mdesc">UBot kamu otomatis follow <strong>@metagzz</strong> untuk menerima semua info dan update terbaru!</div>
+    <div class="mactions"><button class="mbtn prim" onclick="closeM('mdJoin')"><i class="fa-solid fa-check"></i> OK</button></div>
+  </div>
+</div>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="pg-dash" style="display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 16px)">
+    <header class="page-header">
+      <div class="hdr-left">
+        <div class="hdr-icon"><i class="fa-brands fa-telegram"></i></div>
+        <div><div class="hdr-title">UBOT FREE</div><div class="hdr-sub">Telegram Userbot Panel</div></div>
+      </div>
+      <button class="icon-btn" onclick="loadMe()" title="Refresh"><i class="fa-solid fa-rotate"></i></button>
+    </header>
+
+    <!-- Channel notice -->
+    <div class="channel-notice" id="noticeJoin" style="display:none;margin-top:12px">
+      <i class="fa-brands fa-telegram"></i>
+      <div>
+        <div class="channel-notice-t">&#x2705; Auto-follow @metagzz aktif</div>
+        <div class="channel-notice-s">Kamu selalu dapat info &amp; update terbaru</div>
+      </div>
+    </div>
+
+    <div class="welcome-banner" style="margin-top:12px">
+      <div class="welcome-av" id="wAv">M</div>
+      <div>
+        <div class="welcome-t">Selamat datang kembali,</div>
+        <div class="welcome-u" id="wUser">@user</div>
+        <div class="welcome-s">Semoga harimu menyenangkan!</div>
+      </div>
+    </div>
+
+    <div class="sec-lbl">UBOT Status</div>
+    <div class="status-card">
+      <span class="status-badge" id="sBadge">OFFLINE</span>
+      <div class="status-tg"><i class="fa-brands fa-telegram"></i></div>
+      <div class="status-row"><span>Device Model</span><span>Userbot Metagz</span></div>
+      <div class="status-row"><span>System Version</span><span>Smart bot</span></div>
+      <div class="status-row"><span>App Version</span><span>1.0.0</span></div>
+      <div class="status-row"><span>Uptime</span><span id="sUptime">--:--:--</span></div>
+    </div>
+
+    <div class="sec-lbl">Quick Control</div>
+    <div class="qc-wrap">
+      <button class="qc-btn btn-disconnect" id="btnLogout" onclick="askLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Log Out</span>
+      </button>
+      <button class="qc-btn btn-on"      id="btnOn"  onclick="ubotOn()"      disabled><i class="fa-solid fa-play"></i><span>ON</span></button>
+      <button class="qc-btn btn-off"     id="btnOff" onclick="ubotOff()"     disabled><i class="fa-solid fa-stop"></i><span>OFF</span></button>
+      <button class="qc-btn btn-restart" id="btnRst" onclick="ubotRestart()" disabled><i class="fa-solid fa-rotate"></i><span>Restart</span></button>
+    </div>
+
+    <div class="sec-lbl">Statistik</div>
+    <div class="stats-row">
+      <div class="stat-card"><i class="fa-solid fa-terminal" style="color:var(--blue-l)"></i><div class="stat-val" id="stCmd">0</div><div class="stat-lbl">Commands</div></div>
+      <div class="stat-card"><i class="fa-solid fa-message"  style="color:var(--cyan)"></i>  <div class="stat-val" id="stMsg">0</div><div class="stat-lbl">Messages</div></div>
+      <div class="stat-card"><i class="fa-solid fa-triangle-exclamation" style="color:var(--yellow)"></i><div class="stat-val" id="stErr">0</div><div class="stat-lbl">Errors</div></div>
+    </div>
+
+    <div class="sec-lbl">Menu</div>
+    <div class="menu-grid" style="margin-bottom:16px">
+      <div class="menu-card" onclick="location.href='plan.html'">
+        <div class="menu-card-ic blue"><i class="fa-solid fa-crown"></i></div>
+        <div><div class="menu-card-t">Plan</div><div class="menu-card-s" id="mPlan">Free</div></div>
+        <i class="fa-solid fa-chevron-right menu-card-arr"></i>
+      </div>
+      <div class="menu-card" onclick="location.href='profile.html'">
+        <div class="menu-card-ic purple"><i class="fa-solid fa-user"></i></div>
+        <div><div class="menu-card-t">Profil</div><div class="menu-card-s">Lihat &amp; edit profil</div></div>
+        <i class="fa-solid fa-chevron-right menu-card-arr"></i>
+      </div>
+      <a class="menu-card" href="https://t.me/AgzOld" target="_blank">
+        <div class="menu-card-ic cyan"><i class="fa-solid fa-circle-question"></i></div>
+        <div><div class="menu-card-t">Bantuan</div><div class="menu-card-s">Chat dengan admin</div></div>
+        <i class="fa-solid fa-chevron-right menu-card-arr"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══ TERMINAL ═══ -->
+  <div id="pg-term" style="display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 16px)">
+    <header class="page-header">
+      <button class="back-btn" onclick="showPg('dash')"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="hdr-plain">Terminal</div>
+      <button class="icon-btn" onclick="clearTerm()"><i class="fa-solid fa-trash"></i></button>
+    </header>
+    <div class="terminal-box" id="termBox">
+      <div class="tl success"><span class="ttag SUCCESS">SUCCESS</span>Terminal siap. Ketik perintah di bawah.</div>
+      <div class="tcursor">UBot&gt; _</div>
+    </div>
+    <div class="term-row">
+      <input class="term-input" id="termIn" placeholder="Masukkan perintah..." autocomplete="off">
+      <button class="term-send" onclick="sendCmd()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+    <div class="quick-cmds">
+      <button class="qcmd" onclick="runCmd('status')">status</button>
+      <button class="qcmd" onclick="runCmd('start')">start</button>
+      <button class="qcmd" onclick="runCmd('stop')">stop</button>
+      <button class="qcmd" onclick="runCmd('restart')">restart</button>
+      <button class="qcmd" onclick="runCmd('connect')">connect</button>
+      <button class="qcmd" onclick="runCmd('disconnect')">disconnect</button>
+      <button class="qcmd" onclick="runCmd('logout')">logout</button>
+      <button class="qcmd" onclick="runCmd('logs')">logs</button>
+      <button class="qcmd" onclick="runCmd('clear')">clear</button>
+      <button class="qcmd" onclick="runCmd('help')">help</button>
+    </div>
+  </div>
+
+  <!-- ═══ ACTIVITY ═══ -->
+  <div id="pg-act" style="display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 16px)">
+    <header class="page-header">
+      <button class="back-btn" onclick="showPg('dash')"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="hdr-plain">Aktivitas</div>
+      <button class="icon-btn" onclick="clearAct()"><i class="fa-solid fa-trash"></i></button>
+    </header>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterA('all',this)">Semua</button>
+      <button class="filter-tab" onclick="filterA('info',this)">Info</button>
+      <button class="filter-tab" onclick="filterA('command',this)">Command</button>
+      <button class="filter-tab" onclick="filterA('warning',this)">Warning</button>
+      <button class="filter-tab" onclick="filterA('error',this)">Error</button>
+      <button class="filter-tab" onclick="filterA('success',this)">Success</button>
+    </div>
+    <div class="act-list" id="actList"></div>
+  </div>
+
+  <!-- ═══ SETTINGS ═══ -->
+  <div id="pg-set" style="display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 16px)">
+    <header class="page-header">
+      <button class="back-btn" onclick="showPg('dash')"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="hdr-plain">Pengaturan</div>
+      <div style="width:36px"></div>
+    </header>
+    <div class="sg"><div class="sg-lbl">Pengaturan Umum</div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-robot"></i></div><div><div class="si-t">Nama UBot</div><div class="si-v">Userbot Metagz</div></div></div><i class="fa-solid fa-chevron-right si-arr"></i></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-mobile"></i></div><div><div class="si-t">Device Model</div><div class="si-v">Userbot Metagz</div></div></div><i class="fa-solid fa-chevron-right si-arr"></i></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-microchip"></i></div><div><div class="si-t">System Version</div><div class="si-v">Smart bot</div></div></div><i class="fa-solid fa-chevron-right si-arr"></i></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-code-branch"></i></div><div><div class="si-t">App Version</div><div class="si-v">1.0.0</div></div></div><i class="fa-solid fa-chevron-right si-arr"></i></div>
+    </div>
+    <div class="sg" style="margin-top:12px"><div class="sg-lbl">Koneksi</div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-plug"></i></div><div><div class="si-t">Auto Connect</div></div></div><label class="toggle"><input type="checkbox" checked><span class="tsl"></span></label></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-arrows-rotate"></i></div><div><div class="si-t">Auto Reconnect</div></div></div><label class="toggle"><input type="checkbox" checked><span class="tsl"></span></label></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-clock"></i></div><div><div class="si-t">Connection Timeout</div><div class="si-v">60 detik</div></div></div><i class="fa-solid fa-chevron-right si-arr"></i></div>
+    </div>
+    <div class="sg" style="margin-top:12px"><div class="sg-lbl">Notifikasi</div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i></div><div><div class="si-t">Error Notification</div></div></div><label class="toggle"><input type="checkbox" checked><span class="tsl"></span></label></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-eye-slash" style="color:var(--yellow)"></i></div><div><div class="si-t">Offline Notification</div></div></div><label class="toggle"><input type="checkbox"><span class="tsl"></span></label></div>
+      <div class="si"><div class="si-info"><div class="si-ic"><i class="fa-solid fa-download" style="color:var(--green)"></i></div><div><div class="si-t">Update Notification</div></div></div><label class="toggle"><input type="checkbox" checked><span class="tsl"></span></label></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()" style="margin-bottom:20px">
+      <i class="fa-solid fa-right-from-bracket"></i> Keluar dari Akun
+    </button>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-dash" onclick="showPg('dash')"><i class="fa-solid fa-house"></i><span>Dashboard</span></button>
+    <button class="nav-item" id="nav-term" onclick="showPg('term')"><i class="fa-solid fa-terminal"></i><span>Terminal</span></button>
+    <button class="nav-item" id="nav-act"  onclick="showPg('act')"> <i class="fa-solid fa-bolt"></i>    <span>Aktivitas</span></button>
+    <button class="nav-item" id="nav-set"  onclick="showPg('set')"> <i class="fa-solid fa-gear"></i>    <span>Pengaturan</span></button>
+  </nav>
+</div>
+
+<script>
+
+const API = '';  // Relative URL — Vercel proxy ke backend
+async function apiFetch(path, body=null, method=null) {
+  const opts = { credentials:'include', headers:{'Content-Type':'application/json'} };
+  opts.method = body ? (method||'POST') : (method||'GET');
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API+path, opts);
+  const d = await r.json();
+  if (!r.ok) throw Object.assign(new Error(d.error||'Error'), {data:d});
+  return d;
+}
+async function checkServer(){
+  try{ const r=await fetch(API+'/api/health',{signal:AbortSignal.timeout(6000),credentials:'include'}); return r.ok; }
+  catch(e){return false;}
+}
+function el(id){return document.getElementById(id);}
+function closeM(id){el(id)?.classList.remove('show');}
+function toast(msg,color='var(--blue-l)',icon='fa-solid fa-info-circle'){
+  const c=el('toast-c');if(!c)return;
+  const t=document.createElement('div');
+  t.className='toast';t.style.borderColor=color;
+  t.innerHTML=`<i class="${icon}" style="color:${color}"></i>${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);
+}
+
+let udata=null, connected=false, pollTimer=null, actFilter='all', allLogs=[];
+
+async function init() {
+  // 1. Cek server dulu
+  const ok = await checkServer();
+  if (!ok) { el('mdMaint').classList.add('show'); el('loverlay').classList.add('hidden'); return; }
+  // 2. WAJIB login — redirect kalau belum
+  try {
+    const d = await apiFetch('/api/auth/status');
+    if (!d.loggedIn) { window.location.replace('connect.html'); return; }
+    connected = d.ubotConnected;
+  } catch (_) { window.location.replace('connect.html'); return; }
+  await loadMe();
+  el('loverlay').classList.add('hidden');
+  showPg('dash');
+  startPoll();
+  // Cek param upgrade dari Pakasir redirect
+  const p = new URLSearchParams(location.search);
+  if (p.get('upgraded')) {
+    try {
+      await apiFetch('/api/plan/confirm', {plan: p.get('upgraded')});
+      toast('Plan berhasil diupgrade! 🎉', 'var(--green)', 'fa-solid fa-crown');
+    } catch (_) {}
+    history.replaceState({}, '', 'dashboard.html');
+    loadMe();
+  }
+}
+
+let starting = false;
+
+async function loadMe() {
+  try {
+    const d = await apiFetch('/api/me');
+    udata = d;
+    const uname = d.username || d.firstName || 'User';
+    el('wAv').textContent  = uname.replace('@','')[0]?.toUpperCase() || 'U';
+    el('wUser').textContent = uname;
+    el('mPlan').textContent = {free:'Free',pro:'Pro',max:'MAX'}[d.plan] || 'Free';
+    connected = d.ubotConnected; starting = !!d.ubotStarting;
+    updateUI();
+    if (connected) {
+      el('stCmd').textContent = d.commands || 0;
+      el('stMsg').textContent = d.messages  || 0;
+      el('stErr').textContent = d.errors    || 0;
+      el('sUptime').textContent = d.uptime  || '00:00:00';
+    }
+    if (d.joinedMetagzz) el('noticeJoin').style.display = 'flex';
+  } catch (e) { if (e.data?.code === 'UNAUTH') window.location.replace('connect.html'); }
+}
+
+// Profil + status ikut akun Telegram: ditarik ulang otomatis tiap 5 detik
+function startPoll() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(loadMe, 5000);
+}
+
+function updateUI() {
+  const badge=el('sBadge'), bOn=el('btnOn'), bOff=el('btnOff'), bRst=el('btnRst');
+  if (connected) {
+    badge.textContent = 'ONLINE'; badge.className = 'status-badge online';
+  } else if (starting) {
+    badge.textContent = 'MENGHUBUNGKAN'; badge.className = 'status-badge';
+  } else {
+    badge.textContent = 'OFFLINE'; badge.className = 'status-badge';
+    el('sUptime').textContent = '--:--:--';
+    el('stCmd').textContent = el('stMsg').textContent = el('stErr').textContent = '0';
+  }
+  bOn.disabled  = connected || starting;
+  bOff.disabled = !connected;
+  bRst.disabled = !connected;
+}
+
+function askLogout() { el('mdLogout').classList.add('show'); }
+
+async function confirmLogout() {
+  closeM('mdLogout');
+  clearInterval(pollTimer);
+  try { await apiFetch('/api/auth/logout', {}); } catch (_) {}
+  window.location.replace('connect.html');
+}
+
+async function doConnect() {
+  if (connected) { toast('UBot sudah terhubung','var(--green)','fa-solid fa-link'); addTLine('INFO','UBot sudah terhubung'); return; }
+  starting = true; updateUI();
+  try {
+    const d = await apiFetch('/api/ubot/connect', {});
+    if (d.ok || d.alreadyConnected) {
+      connected = true; starting = false; updateUI();
+      toast('UBot berhasil terhubung! 🚀', 'var(--green)', 'fa-solid fa-link');
+      addTLine('SUCCESS', 'UBot terhubung');
+      loadAct(); loadMe();
+    }
+  } catch (e) {
+    if (e.data?.code === 'UNAUTH') { window.location.replace('connect.html'); return; }
+    toast(e.data?.error || 'Gagal connect: ' + e.message, 'var(--red)', 'fa-solid fa-xmark');
+    addTLine('ERROR', e.data?.error || e.message);
+  } finally {
+    starting = false; updateUI();
+  }
+}
+
+async function confirmDisconn() {
+  closeM('mdDisconn');
+  try {
+    await apiFetch('/api/ubot/disconnect', {});
+    connected = false; updateUI();
+    toast('UBot berhasil diputus', 'var(--text2)', 'fa-solid fa-plug-circle-xmark');
+    addTLine('INFO', 'UBot diputus');
+    loadAct();
+  } catch (e) {
+    if (e.data?.code === 'UNAUTH') { window.location.replace('connect.html'); return; }
+    toast(e.data?.error || 'Gagal disconnect', 'var(--red)', 'fa-solid fa-xmark');
+  }
+}
+
+function ubotOn()  { doConnect(); }
+function ubotOff() {
+  if (!connected) { toast('UBot sudah mati','var(--yellow)','fa-solid fa-triangle-exclamation'); return; }
+  el('mdDisconn').classList.add('show');
+}
+
+async function ubotRestart() {
+  if (!connected) { toast('UBot belum terhubung','var(--yellow)','fa-solid fa-triangle-exclamation'); return; }
+  toast('UBot restart...','var(--purple)','fa-solid fa-rotate'); addTLine('INFO','Restarting...');
+  starting = true; connected = false; updateUI();
+  try {
+    await apiFetch('/api/ubot/restart', {});
+    connected = true;
+    toast('UBot kembali online!','var(--green)','fa-solid fa-check-circle'); addTLine('SUCCESS','UBot kembali online');
+  } catch (e) {
+    if (e.data?.code === 'UNAUTH') { window.location.replace('connect.html'); return; }
+    toast(e.data?.error || 'Gagal restart','var(--red)','fa-solid fa-xmark'); addTLine('ERROR', e.data?.error || 'Gagal restart');
+  } finally { starting = false; updateUI(); loadMe(); }
+}
+
+async function loadAct() {
+  try {
+    const d = await apiFetch('/api/activity');
+    allLogs = d.logs || []; renderAct();
+  } catch (_) {}
+}
+
+function renderAct() {
+  const list = el('actList');
+  const imap = {INFO:'fa-solid fa-circle-info',SUCCESS:'fa-solid fa-circle-check',ERROR:'fa-solid fa-circle-xmark',WARNING:'fa-solid fa-circle-exclamation',COMMAND:'fa-solid fa-terminal'};
+  const f = actFilter==='all' ? allLogs : allLogs.filter(l => l.type.toLowerCase() === actFilter);
+  if (!f.length) { list.innerHTML='<div class="act-empty"><i class="fa-solid fa-inbox"></i><p>Belum ada aktivitas</p></div>'; return; }
+  list.innerHTML = f.map(log => {
+    const t   = new Date(log.ts).toLocaleTimeString('id-ID',{hour12:false});
+    const cls = log.type.toLowerCase();
+    return `<div class="act-item"><div class="act-ic ${cls}"><i class="${imap[log.type]||imap.INFO}"></i></div><div style="flex:1"><div class="act-time">${t}</div><span class="act-badge ${log.type}">${log.type}</span><div class="act-msg">${log.msg}</div></div></div>`;
+  }).join('');
+}
+
+function filterA(f, btn) {
+  actFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); renderAct();
+}
+
+async function clearAct() {
+  await apiFetch('/api/activity/clear', {});
+  allLogs = []; renderAct();
+  toast('Log dihapus','var(--text2)','fa-solid fa-trash');
+}
+
+function addTLine(type, msg) {
+  const box = el('termBox'), cur = box.querySelector('.tcursor');
+  const t   = new Date().toLocaleTimeString('id-ID',{hour12:false});
+  const cmap = {INFO:'info',SUCCESS:'success',ERROR:'error',WARN:'warn',CMD:'cmd'};
+  const div  = document.createElement('div');
+  div.className = 'tl ' + (cmap[type] || 'info');
+  div.innerHTML  = `[${t}] <span class="ttag ${type}">${type}</span> ${msg}`;
+  box.insertBefore(div, cur); box.scrollTop = box.scrollHeight;
+}
+
+function clearTerm() {
+  el('termBox').innerHTML = '<div class="tcursor">UBot&gt; _</div>';
+  toast('Terminal dibersihkan','var(--text2)','fa-solid fa-trash');
+}
+
+function runCmd(c) { el('termIn').value = c; sendCmd(); }
+
+function sendCmd() {
+  const inp = el('termIn'), cmd = inp.value.trim();
+  if (!cmd) return; inp.value = '';
+  addTLine('CMD', '> ' + cmd);
+  const cmds = {
+    status:     () => addTLine('INFO', `Status: ${connected?'ONLINE':(starting?'MENGHUBUNGKAN':'OFFLINE')} | Plan: ${(udata?.plan||'free').toUpperCase()}${udata?.handle ? ' | '+udata.handle : ''}`),
+    start:      () => doConnect(),
+    connect:    () => doConnect(),
+    stop:       () => connected ? el('mdDisconn').classList.add('show') : addTLine('INFO','UBot tidak berjalan'),
+    disconnect: () => connected ? el('mdDisconn').classList.add('show') : addTLine('INFO','UBot tidak terhubung'),
+    restart:    () => ubotRestart(),
+    logout:     () => askLogout(),
+    logs:       async () => { await loadAct(); allLogs.slice(0,10).forEach(l => addTLine(l.type, l.msg)); if (!allLogs.length) addTLine('INFO','Tidak ada log'); },
+    clear:      () => clearTerm(),
+    help:       () => addTLine('INFO', 'Perintah: status start stop restart connect disconnect logout logs clear help'),
+  };
+  (cmds[cmd.toLowerCase()] || (() => addTLine('ERROR','Perintah tidak dikenal. Ketik "help"')))();
+}
+
+function showPg(name) {
+  ['dash','term','act','set'].forEach(p => {
+    el('pg-'+p).style.display = 'none';
+    el('nav-'+p)?.classList.remove('active');
+  });
+  const pg = el('pg-'+name);
+  if (pg) { pg.style.display = 'flex'; pg.style.flexDirection = 'column'; }
+  el('nav-'+name)?.classList.add('active');
+  if (name === 'act') loadAct();
+}
+
+function doLogout() { askLogout(); }
+
+el('termIn').addEventListener('keydown', e => { if (e.key==='Enter') sendCmd(); });
+init();
+</script>
+</body>
+</html>
